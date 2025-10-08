@@ -1,0 +1,869 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script>```html
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Juego de Conocimiento: Ballet Clásico</title>
+    <style>
+        /* Colores personalizados: Rosa pastel, dorado y blanco para tema ballet */
+        :root {
+            --primary-color: #F7C9C9; /* Rosa pastel más suave */
+            --secondary-color: #FFF5F5;
+            --accent-color: #FFD700;
+            --text-color: #333;
+            --success-color: #4CAF50;
+            --error-color: #f44336;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, var(--secondary-color), var(--primary-color));
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        #container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            background-color: var(--primary-color);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            animation: headerPulse 2.5s ease-in-out infinite;
+        }
+
+        @keyframes headerPulse {
+            0%, 100% { transform: scale(1); opacity: 0.9; }
+            50% { transform: scale(1.03); opacity: 1; }
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 2.5em;
+        }
+
+        section {
+            margin-bottom: 40px;
+        }
+
+        /* Layout moderno con Flexbox para presentación */
+        #presentation {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .character {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            overflow: hidden;
+            position: relative;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            transition: transform 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+
+        .character img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* Animaciones específicas de ballet más fluidas */
+        .character.intro { animation: plieAnimation 4s cubic-bezier(0.68, -0.55, 0.265, 1.55) infinite; }
+        .character.phase1 { animation: tenduAnimation 4s cubic-bezier(0.4, 0, 0.2, 1) infinite; }
+        .character.phase2 { animation: rondDeJambeAnimation 5s cubic-bezier(0.68, -0.55, 0.265, 1.55) infinite; }
+        .character.phase3 { animation: arabesqueAnimation 4.5s cubic-bezier(0.4, 0, 0.2, 1) infinite; }
+        .character.phase4 { animation: jeteAnimation 5s cubic-bezier(0.68, -0.55, 0.265, 1.55) infinite; }
+
+        @keyframes plieAnimation {
+            0%, 100% { transform: translateY(0) scale(1); }
+            50% { transform: translateY(25px) scaleY(0.93); filter: brightness(1.05); }
+        }
+
+        @keyframes tenduAnimation {
+            0%, 100% { transform: translateX(0) rotate(0deg); }
+            50% { transform: translateX(35px) rotate(3deg); filter: brightness(1.05); }
+        }
+
+        @keyframes rondDeJambeAnimation {
+            0% { transform: rotate(0deg) scale(1); }
+            25% { transform: rotate(90deg) scale(1.02); }
+            50% { transform: rotate(180deg) scale(1); }
+            75% { transform: rotate(270deg) scale(1.02); }
+            100% { transform: rotate(360deg) scale(1); }
+        }
+
+        @keyframes arabesqueAnimation {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-25px) rotate(7deg); filter: brightness(1.05); }
+        }
+
+        @keyframes jeteAnimation {
+            0%, 100% { transform: translateY(0) translateX(0); }
+            20% { transform: translateY(-50px) translateX(15px); filter: brightness(1.05); }
+            40% { transform: translateY(0) translateX(30px); }
+            60% { transform: translateY(-50px) translateX(45px); }
+            80% { transform: translateY(0) translateX(60px); }
+        }
+
+        .character:hover img {
+            transform: scale(1.15) rotate(10deg);
+        }
+
+        .explanation {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            max-width: 800px;
+            text-align: center;
+            transition: transform 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55), box-shadow 0.5s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .explanation:hover {
+            transform: scale(1.07);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+        }
+
+        .explanation::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            animation: shine 2.5s infinite;
+        }
+
+        @keyframes shine {
+            0% { left: -100%; }
+            50% { left: 100%; }
+            100% { left: 100%; }
+        }
+
+        .phase {
+            display: none;
+            animation: fadeIn 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .phase.active {
+            display: block;
+        }
+
+        .phase img {
+            max-width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            transition: transform 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            animation: imageFloat 3s ease-in-out infinite;
+        }
+
+        .phase img:hover {
+            transform: scale(1.07);
+        }
+
+        @keyframes imageFloat {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(40px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        button {
+            background-color: var(--accent-color);
+            color: var(--text-color);
+            border: none;
+            padding: 12px 24px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            margin: 10px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+
+        button:hover:not(:disabled) {
+            background-color: #E6C200;
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.3);
+        }
+
+        button::after {
+            content: '✨';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            opacity: 0;
+            transition: opacity 0.4s ease;
+            font-size: 1.5em;
+        }
+
+        button:hover:not(:disabled)::after {
+            opacity: 1;
+        }
+
+        /* Contenedor para botones de pregunta */
+        .question-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        /* Quiz con Flexbox para una pregunta a la vez */
+        #quiz {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .question {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            animation: slideIn 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: transform 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            width: 100%;
+            max-width: 600px;
+            display: none;
+        }
+
+        .question.active {
+            display: block;
+        }
+
+        .question:hover {
+            transform: translateY(-7px);
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-40px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .option {
+            padding: 10px;
+            background-color: var(--secondary-color);
+            border: 1px solid var(--primary-color);
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .option:hover {
+            background-color: var(--primary-color);
+            transform: scale(1.05);
+        }
+
+        .option::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transition: left 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .option:hover::before {
+            left: 100%;
+        }
+
+        .option.selected {
+            background-color: var(--accent-color);
+            transform: scale(1.07);
+        }
+
+        .option.correct {
+            background-color: var(--success-color);
+            color: white;
+            animation: correctAnswer 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+
+        .option.incorrect {
+            background-color: var(--error-color);
+            color: white;
+            animation: incorrectAnswer 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        @keyframes correctAnswer {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.15); }
+            100% { transform: scale(1); }
+        }
+
+        @keyframes incorrectAnswer {
+            0% { transform: translateX(0); }
+            20% { transform: translateX(-7px); }
+            40% { transform: translateX(7px); }
+            60% { transform: translateX(-7px); }
+            80% { transform: translateX(7px); }
+            100% { transform: translateX(0); }
+        }
+
+        .explanation-text {
+            margin-top: 15px;
+            padding: 10px;
+            background-color: var(--secondary-color);
+            border: 1px solid var(--error-color);
+            border-radius: 5px;
+            font-size: 0.9em;
+            color: var(--text-color);
+            animation: fadeIn 0.5s ease-in-out;
+            text-align: left;
+        }
+
+        #score {
+            text-align: center;
+            font-size: 1.5em;
+            margin-top: 20px;
+            animation: scorePop 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            display: none;
+        }
+
+        #thanks {
+            display: none;
+            text-align: center;
+            font-size: 1.5em;
+            margin-top: 20px;
+            animation: scorePop 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        #thanks img {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            margin-bottom: 20px;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes scorePop {
+            0% { transform: scale(0.3); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        /* Diseño responsivo */
+        @media (max-width: 768px) {
+            #presentation {
+                flex-direction: column;
+            }
+
+            .character {
+                width: 150px;
+                height: 150px;
+            }
+
+            header h1 {
+                font-size: 2em;
+            }
+
+            .options {
+                flex-direction: column;
+            }
+
+            .question {
+                max-width: 90%;
+            }
+
+            .phase img {
+                height: 150px;
+            }
+
+            .question-buttons {
+                flex-direction: column;
+                gap: 8px;
+            }
+        }
+
+        @media (min-width: 769px) {
+            #presentation {
+                flex-direction: row;
+                justify-content: center;
+            }
+
+            .explanation {
+                margin-left: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="container">
+        <header>
+            <h1>🎭 Juego de Conocimiento: Ballet Clásico 🎭</h1>
+            <p>¡Explora las fases del ballet y desafía tus conocimientos!</p>
+        </header>
+
+        <section id="presentation">
+            <div class="character" id="character">
+                <img src="images/bailarina.jpg" alt="Bailarina clásica guía" id="characterImg">
+            </div>
+            <div class="explanation">
+                <div class="phase active" id="intro">
+                    <img src="images/introduccion.jpg" alt="Estudio de ballet con bailarines preparándose" id="introImg">
+                    <h2>¡Bienvenidos al mundo del Ballet Clásico!</h2>
+                    <p>Soy tu guía, una bailarina mágica. Te llevaré a través de las fases de una clase de ballet con elegancia y detalle. ¡Comencemos este viaje!</p>
+                    <button onclick="nextPhase(1)" aria-label="Ir a la fase de calentamiento">Siguiente: Calentamiento</button>
+                </div>
+                <div class="phase" id="phase1">
+                    <img src="images/calentamiento.jpg" alt="Bailarines calentando con estiramientos" id="phase1Img">
+                    <h2>Fase 1: Calentamiento</h2>
+                    <p>El calentamiento prepara el cuerpo para el movimiento. Incluye ejercicios suaves como rotaciones de tobillos, estiramientos dinámicos y movimientos de cadera. Dura 10-15 minutos, elevando la temperatura corporal y mejorando la flexibilidad. La postura es clave en esta etapa.</p>
+                    <button onclick="nextPhase(2)" aria-label="Ir a la fase de trabajo en la barra">Siguiente: Trabajo en la Barra</button>
+                </div>
+                <div class="phase" id="phase2">
+                    <img src="images/barra.jpg" alt="Bailarines practicando pliés en la barra" id="phase2Img">
+                    <h2>Fase 2: Trabajo en la Barra</h2>
+                    <p>En la barra practicamos pliés, tendus, ronds de jambe y frappés en las cinco posiciones. Esta fase fortalece los músculos y perfecciona la técnica. Dura unos 30 minutos y es esencial para el control y el equilibrio, especialmente para principiantes.</p>
+                    <button onclick="nextPhase(3)" aria-label="Ir a la fase de trabajo en el centro">Siguiente: Trabajo en el Centro</button>
+                </div>
+                <div class="phase" id="phase3">
+                    <img src="images/centro.jpg" alt="Bailarina en posición de arabesque en el centro" id="phase3Img">
+                    <h2>Fase 3: Trabajo en el Centro</h2>
+                    <p>Sin la barra, los bailarines realizan port de bras, adagios y equilibrios como arabesques. Esta fase desarrolla la gracia y la expresión artística. Dura 20-25 minutos y requiere concentración para lograr movimientos fluidos y elegantes.</p>
+                    <button onclick="nextPhase(4)" aria-label="Ir a la fase de allegro">Siguiente: Allegro</button>
+                </div>
+                <div class="phase" id="phase4">
+                    <img src="images/allegro.jpg" alt="Bailarín realizando un grand jeté" id="phase4Img">
+                    <h2>Fase 4: Allegro</h2>
+                    <p>El allegro incluye saltos enérgicos como jetés, assemblés y grands jetés. Es la fase más dinámica, mejorando la elevación y la precisión. Dura 15-20 minutos y prepara a los bailarines para brillar en el escenario con vitalidad.</p>
+                    <button onclick="startQuiz()" aria-label="Iniciar el quiz">¡Juega el Quiz!</button>
+                </div>
+            </div>
+        </section>
+
+        <section id="quiz">
+            <div class="question" id="question1">
+                <h3>¿Cuál es la primera posición básica en ballet?</h3>
+                <div class="options">
+                    <div class="option" onclick="selectOption(1, this, 'Talones juntos, dedos abiertos')" aria-label="Seleccionar Talones juntos, dedos abiertos">Talones juntos, dedos abiertos</div>
+                    <div class="option" onclick="selectOption(1, this, 'Pies paralelos separados')" aria-label="Seleccionar Pies paralelos separados">Pies paralelos separados</div>
+                    <div class="option" onclick="selectOption(1, this, 'Talones juntos, pies en forma de A')" aria-label="Seleccionar Talones juntos, pies en forma de A">Talones juntos, pies en forma de A</div>
+                    <div class="option" onclick="selectOption(1, this, 'Pies cruzados')" aria-label="Seleccionar Pies cruzados">Pies cruzados</div>
+                </div>
+                <p class="explanation-text" id="explanation1" style="display: none;" aria-live="polite"></p>
+                <div class="question-buttons">
+                    <button onclick="goBackQuestion(1)" aria-label="Volver a la pregunta anterior" disabled>Volver</button>
+                    <button onclick="nextQuestion(1)" aria-label="Siguiente pregunta">Siguiente</button>
+                    <button onclick="endQuiz()" aria-label="Terminar el quiz">Terminar Quiz</button>
+                </div>
+            </div>
+            <div class="question" id="question2">
+                <h3>¿Qué significa 'plié' en ballet?</h3>
+                <div class="options">
+                    <div class="option" onclick="selectOption(2, this, 'Salto')" aria-label="Seleccionar Salto">Salto</div>
+                    <div class="option" onclick="selectOption(2, this, 'Flexión de rodillas')" aria-label="Seleccionar Flexión de rodillas">Flexión de rodillas</div>
+                    <div class="option" onclick="selectOption(2, this, 'Giro')" aria-label="Seleccionar Giro">Giro</div>
+                    <div class="option" onclick="selectOption(2, this, 'Estiramiento')" aria-label="Seleccionar Estiramiento">Estiramiento</div>
+                </div>
+                <p class="explanation-text" id="explanation2" style="display: none;" aria-live="polite"></p>
+                <div class="question-buttons">
+                    <button onclick="goBackQuestion(2)" aria-label="Volver a la pregunta anterior">Volver</button>
+                    <button onclick="nextQuestion(2)" aria-label="Siguiente pregunta">Siguiente</button>
+                    <button onclick="endQuiz()" aria-label="Terminar el quiz">Terminar Quiz</button>
+                </div>
+            </div>
+            <div class="question" id="question3">
+                <h3>¿En qué fase se usa la barra principalmente?</h3>
+                <div class="options">
+                    <div class="option" onclick="selectOption(3, this, 'Allegro')" aria-label="Seleccionar Allegro">Allegro</div>
+                    <div class="option" onclick="selectOption(3, this, 'Calentamiento')" aria-label="Seleccionar Calentamiento">Calentamiento</div>
+                    <div class="option" onclick="selectOption(3, this, 'Trabajo en la Barra')" aria-label="Seleccionar Trabajo en la Barra">Trabajo en la Barra</div>
+                    <div class="option" onclick="selectOption(3, this, 'Centro')" aria-label="Seleccionar Centro">Centro</div>
+                </div>
+                <p class="explanation-text" id="explanation3" style="display: none;" aria-live="polite"></p>
+                <div class="question-buttons">
+                    <button onclick="goBackQuestion(3)" aria-label="Volver a la pregunta anterior">Volver</button>
+                    <button onclick="nextQuestion(3)" aria-label="Siguiente pregunta">Siguiente</button>
+                    <button onclick="endQuiz()" aria-label="Terminar el quiz">Terminar Quiz</button>
+                </div>
+            </div>
+            <div class="question" id="question4">
+                <h3>¿Qué es un 'arabesque'?</h3>
+                <div class="options">
+                    <div class="option" onclick="selectOption(4, this, 'Una posición de equilibrio en una pierna')" aria-label="Seleccionar Una posición de equilibrio en una pierna">Una posición de equilibrio en una pierna</div>
+                    <div class="option" onclick="selectOption(4, this, 'Un salto alto')" aria-label="Seleccionar Un salto alto">Un salto alto</div>
+                    <div class="option" onclick="selectOption(4, this, 'Un giro rápido')" aria-label="Seleccionar Un giro rápido">Un giro rápido</div>
+                    <div class="option" onclick="selectOption(4, this, 'Una flexión')" aria-label="Seleccionar Una flexión">Una flexión</div>
+                </div>
+                <p class="explanation-text" id="explanation4" style="display: none;" aria-live="polite"></p>
+                <div class="question-buttons">
+                    <button onclick="goBackQuestion(4)" aria-label="Volver a la pregunta anterior">Volver</button>
+                    <button onclick="nextQuestion(4)" aria-label="Siguiente pregunta">Siguiente</button>
+                    <button onclick="endQuiz()" aria-label="Terminar el quiz">Terminar Quiz</button>
+                </div>
+            </div>
+            <div class="question" id="question5">
+                <h3>¿Cuál es el ballet más famoso de Tchaikovsky?</h3>
+                <div class="options">
+                    <div class="option" onclick="selectOption(5, this, 'El Lago de los Cisnes')" aria-label="Seleccionar El Lago de los Cisnes">El Lago de los Cisnes</div>
+                    <div class="option" onclick="selectOption(5, this, 'Romeo y Julieta')" aria-label="Seleccionar Romeo y Julieta">Romeo y Julieta</div>
+                    <div class="option" onclick="selectOption(5, this, 'La Bayadère')" aria-label="Seleccionar La Bayadère">La Bayadère</div>
+                    <div class="option" onclick="selectOption(5, this, 'Giselle')" aria-label="Seleccionar Giselle">Giselle</div>
+                </div>
+                <p class="explanation-text" id="explanation5" style="display: none;" aria-live="polite"></p>
+                <div class="question-buttons">
+                    <button onclick="goBackQuestion(5)" aria-label="Volver a la pregunta anterior">Volver</button>
+                    <button onclick="nextQuestion(5)" aria-label="Siguiente pregunta">Siguiente</button>
+                    <button onclick="endQuiz()" aria-label="Terminar el quiz">Terminar Quiz</button>
+                </div>
+            </div>
+            <div class="question" id="question6">
+                <h3>¿Qué movimiento consiste en un giro sobre una pierna?</h3>
+                <div class="options">
+                    <div class="option" onclick="selectOption(6, this, 'Pirouette')" aria-label="Seleccionar Pirouette">Pirouette</div>
+                    <div class="option" onclick="selectOption(6, this, 'Jeté')" aria-label="Seleccionar Jeté">Jeté</div>
+                    <div class="option" onclick="selectOption(6, this, 'Plié')" aria-label="Seleccionar Plié">Plié</div>
+                    <div class="option" onclick="selectOption(6, this, 'Tendu')" aria-label="Seleccionar Tendu">Tendu</div>
+                </div>
+                <p class="explanation-text" id="explanation6" style="display: none;" aria-live="polite"></p>
+                <div class="question-buttons">
+                    <button onclick="goBackQuestion(6)" aria-label="Volver a la pregunta anterior">Volver</button>
+                    <button onclick="nextQuestion(6)" aria-label="Siguiente pregunta">Siguiente</button>
+                    <button onclick="endQuiz()" aria-label="Terminar el quiz">Terminar Quiz</button>
+                </div>
+            </div>
+            <div class="question" id="question7">
+                <h3>¿Cuál es el propósito principal del 'port de bras'?</h3>
+                <div class="options">
+                    <div class="option" onclick="selectOption(7, this, 'Fortalecer las piernas')" aria-label="Seleccionar Fortalecer las piernas">Fortalecer las piernas</div>
+                    <div class="option" onclick="selectOption(7, this, 'Mejorar el movimiento de brazos')" aria-label="Seleccionar Mejorar el movimiento de brazos">Mejorar el movimiento de brazos</div>
+                    <div class="option" onclick="selectOption(7, this, 'Aumentar la velocidad de los saltos')" aria-label="Seleccionar Aumentar la velocidad de los saltos">Aumentar la velocidad de los saltos</div>
+                    <div class="option" onclick="selectOption(7, this, 'Perfeccionar los giros')" aria-label="Seleccionar Perfeccionar los giros">Perfeccionar los giros</div>
+                </div>
+                <p class="explanation-text" id="explanation7" style="display: none;" aria-live="polite"></p>
+                <div class="question-buttons">
+                    <button onclick="goBackQuestion(7)" aria-label="Volver a la pregunta anterior">Volver</button>
+                    <button onclick="nextQuestion(7)" aria-label="Siguiente pregunta">Siguiente</button>
+                    <button onclick="endQuiz()" aria-label="Terminar el quiz">Terminar Quiz</button>
+                </div>
+            </div>
+            <div class="question" id="question8">
+                <h3>¿Qué es un 'frappé' en ballet?</h3>
+                <div class="options">
+                    <div class="option" onclick="selectOption(8, this, 'Un movimiento rápido del pie')" aria-label="Seleccionar Un movimiento rápido del pie">Un movimiento rápido del pie</div>
+                    <div class="option" onclick="selectOption(8, this, 'Un salto grande')" aria-label="Seleccionar Un salto grande">Un salto grande</div>
+                    <div class="option" onclick="selectOption(8, this, 'Una postura de equilibrio')" aria-label="Seleccionar Una postura de equilibrio">Una postura de equilibrio</div>
+                    <div class="option" onclick="selectOption(8, this, 'Un giro completo')" aria-label="Seleccionar Un giro completo">Un giro completo</div>
+                </div>
+                <p class="explanation-text" id="explanation8" style="display: none;" aria-live="polite"></p>
+                <div class="question-buttons">
+                    <button onclick="goBackQuestion(8)" aria-label="Volver a la pregunta anterior">Volver</button>
+                    <button onclick="nextQuestion(8)" aria-label="Siguiente pregunta">Siguiente</button>
+                    <button onclick="endQuiz()" aria-label="Terminar el quiz">Terminar Quiz</button>
+                </div>
+            </div>
+            <div class="question" id="question9">
+                <h3>¿En qué ballet aparece el personaje Odette?</h3>
+                <div class="options">
+                    <div class="option" onclick="selectOption(9, this, 'El Lago de los Cisnes')" aria-label="Seleccionar El Lago de los Cisnes">El Lago de los Cisnes</div>
+                    <div class="option" onclick="selectOption(9, this, 'El Cascanueces')" aria-label="Seleccionar El Cascanueces">El Cascanueces</div>
+                    <div class="option" onclick="selectOption(9, this, 'La Bella Durmiente')" aria-label="Seleccionar La Bella Durmiente">La Bella Durmiente</div>
+                    <div class="option" onclick="selectOption(9, this, 'Giselle')" aria-label="Seleccionar Giselle">Giselle</div>
+                </div>
+                <p class="explanation-text" id="explanation9" style="display: none;" aria-live="polite"></p>
+                <div class="question-buttons">
+                    <button onclick="goBackQuestion(9)" aria-label="Volver a la pregunta anterior">Volver</button>
+                    <button onclick="nextQuestion(9)" aria-label="Siguiente pregunta">Siguiente</button>
+                    <button onclick="endQuiz()" aria-label="Terminar el quiz">Terminar Quiz</button>
+                </div>
+            </div>
+            <div class="question" id="question10">
+                <h3>¿Qué significa 'en pointe' en ballet?</h3>
+                <div class="options">
+                    <div class="option" onclick="selectOption(10, this, 'Bailar sobre las puntas de los pies')" aria-label="Seleccionar Bailar sobre las puntas de los pies">Bailar sobre las puntas de los pies</div>
+                    <div class="option" onclick="selectOption(10, this, 'Bailar con los pies planos')" aria-label="Seleccionar Bailar con los pies planos">Bailar con los pies planos</div>
+                    <div class="option" onclick="selectOption(10, this, 'Realizar un salto alto')" aria-label="Seleccionar Realizar un salto alto">Realizar un salto alto</div>
+                    <div class="option" onclick="selectOption(10, this, 'Hacer un giro rápido')" aria-label="Seleccionar Hacer un giro rápido">Hacer un giro rápido</div>
+                </div>
+                <p class="explanation-text" id="explanation10" style="display: none;" aria-live="polite"></p>
+                <div class="question-buttons">
+                    <button onclick="goBackQuestion(10)" aria-label="Volver a la pregunta anterior">Volver</button>
+                    <button onclick="submitQuiz()" aria-label="Enviar respuestas del quiz">Enviar Respuestas</button>
+                    <button onclick="endQuiz()" aria-label="Terminar el quiz">Terminar Quiz</button>
+                </div>
+            </div>
+            <div id="score"></div>
+            <div id="thanks">
+                <img src="images/gracias.jpg" alt="Bailarina en una pose final" id="thanksImg">
+                <p><strong>¡Gracias por participar!</strong> Espero que hayas disfrutado aprendiendo sobre el ballet clásico.</p>
+                <button onclick="location.reload()" aria-label="Jugar de nuevo">Jugar de nuevo</button>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        // Cargar imagen para la sección de agradecimiento usando Library of Congress API
+        fetch('https://www.loc.gov/search/?q=ballet+dancer&fo=json')
+            .then(response => response.json())
+            .then(data => {
+                if (data.results && data.results[0] && data.results[0].image_url && data.results[0].image_url.length > 0) {
+                    document.getElementById('thanksImg').src = data.results[0].image_url[0];
+                } else {
+                    document.getElementById('thanksImg').src = 'images/gracias.jpg';
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching thank you image:', error);
+                document.getElementById('thanksImg').src = 'images/gracias.jpg';
+            });
+
+        let currentPhase = 0;
+        const phases = ['intro', 'phase1', 'phase2', 'phase3', 'phase4'];
+        const character = document.getElementById('character');
+
+        function nextPhase(index) {
+            document.getElementById(phases[currentPhase]).classList.remove('active');
+            character.classList.remove(phases[currentPhase]);
+            currentPhase = index;
+            document.getElementById(phases[currentPhase]).classList.add('active');
+            character.classList.add(phases[currentPhase]);
+        }
+
+        function startQuiz() {
+            document.getElementById('presentation').style.display = 'none';
+            document.getElementById('quiz').style.display = 'flex';
+            document.getElementById('question1').classList.add('active');
+            character.classList.remove(phases[currentPhase]);
+        }
+
+        // Lógica del quiz
+        const answers = {
+            1: 'Talones juntos, pies en forma de A',
+            2: 'Flexión de rodillas',
+            3: 'Trabajo en la Barra',
+            4: 'Una posición de equilibrio en una pierna',
+            5: 'El Lago de los Cisnes',
+            6: 'Pirouette',
+            7: 'Mejorar el movimiento de brazos',
+            8: 'Un movimiento rápido del pie',
+            9: 'El Lago de los Cisnes',
+            10: 'Bailar sobre las puntas de los pies'
+        };
+
+        const explanations = {
+            1: 'La primera posición en ballet clásico consiste en juntar los talones con los pies formando una "A" o en ángulo abierto hacia afuera, asegurando una rotación externa desde las caderas.',
+            2: '"Plié" significa flexión de rodillas en francés, un movimiento fundamental en ballet que se realiza manteniendo los talones en el suelo en demi-plié o levantándolos en grand plié.',
+            3: 'El trabajo en la barra es la fase donde se usa la barra para practicar movimientos como pliés, tendus y frappés, ayudando a los bailarines a desarrollar fuerza y técnica.',
+            4: 'Un arabesque es una posición donde el bailarín se equilibra sobre una pierna mientras la otra se extiende hacia atrás, manteniendo una postura elegante y alineada.',
+            5: '"El Lago de los Cisnes" es el ballet más famoso compuesto por Tchaikovsky, conocido por su música icónica y su narrativa emocional sobre Odette y Odile.',
+            6: 'Una pirouette es un giro ejecutado sobre una pierna, a menudo en posición relevé, mientras que jeté es un salto, plié una flexión y tendu un estiramiento del pie.',
+            7: 'El port de bras se centra en el movimiento elegante y fluido de los brazos, esencial para la expresión artística y la coordinación en ballet.',
+            8: 'Un frappé es un movimiento rápido del pie que golpea el suelo o la pierna de apoyo, usado para desarrollar velocidad y precisión en el trabajo de pies.',
+            9: 'Odette es el personaje principal de "El Lago de los Cisnes", una princesa transformada en cisne, central en la trama de este ballet de Tchaikovsky.',
+            10: '"En pointe" se refiere a bailar sobre las puntas de los pies usando zapatillas de punta, una técnica avanzada que requiere fuerza y equilibrio.'
+        };
+
+        const selected = {};
+        let currentQuestion = 1;
+
+        function selectOption(qNum, element, value) {
+            selected[qNum] = value;
+            const options = element.parentElement.children;
+            for (let opt of options) {
+                opt.classList.remove('selected');
+            }
+            element.classList.add('selected');
+            // Habilitar el botón de "Siguiente" si está deshabilitado
+            const nextButton = document.querySelector(`#question${qNum} button[aria-label="Siguiente pregunta"]`);
+            nextButton.disabled = false;
+        }
+
+        function nextQuestion(qNum) {
+            if (!selected[qNum]) {
+                alert('Por favor, selecciona una opción antes de continuar.');
+                return;
+            }
+            const nextButton = document.querySelector(`#question${qNum} button[aria-label="Siguiente pregunta"]`);
+            nextButton.disabled = true; // Deshabilitar botón durante la transición
+            const options = document.querySelectorAll(`#question${qNum} .options .option`);
+            const explanationElement = document.getElementById(`explanation${qNum}`);
+            for (let opt of options) {
+                opt.style.pointerEvents = 'none';
+                if (opt.textContent.trim() === answers[qNum]) {
+                    opt.classList.add('correct');
+                } else if (selected[qNum] === opt.textContent.trim() && selected[qNum] !== answers[qNum]) {
+                    opt.classList.add('incorrect');
+                    explanationElement.textContent = explanations[qNum];
+                    explanationElement.style.display = 'block';
+                }
+            }
+            setTimeout(() => {
+                document.getElementById(`question${qNum}`).classList.remove('active');
+                explanationElement.style.display = 'none'; // Ocultar explicación al cambiar de pregunta
+                if (qNum < 10) {
+                    document.getElementById(`question${qNum + 1}`).classList.add('active');
+                    currentQuestion = qNum + 1;
+                }
+                nextButton.disabled = false; // Rehabilitar botón después de la transición
+            }, 2000); // 2 segundos para leer la explicación
+        }
+
+        function goBackQuestion(qNum) {
+            if (qNum <= 1) return; // No retroceder si es la primera pregunta
+            const currentQuestionElement = document.getElementById(`question${qNum}`);
+            const explanationElement = document.getElementById(`explanation${qNum}`);
+            currentQuestionElement.classList.remove('active');
+            explanationElement.style.display = 'none'; // Ocultar explicación
+            const options = document.querySelectorAll(`#question${qNum} .options .option`);
+            for (let opt of options) {
+                opt.style.pointerEvents = 'auto'; // Rehabilitar interacciones
+                opt.classList.remove('selected', 'correct', 'incorrect');
+            }
+            document.getElementById(`question${qNum - 1}`).classList.add('active');
+            currentQuestion = qNum - 1;
+            // Rehabilitar el botón de siguiente si estaba deshabilitado
+            const nextButton = document.querySelector(`#question${qNum - 1} button[aria-label="Siguiente pregunta"]`);
+            nextButton.disabled = !selected[qNum - 1]; // Habilitar solo si hay respuesta seleccionada
+        }
+
+        function endQuiz() {
+            const currentQuestionElement = document.getElementById(`question${currentQuestion}`);
+            currentQuestionElement.classList.remove('active');
+            let score = 0;
+            let answeredQuestions = 0;
+            for (let q in answers) {
+                if (selected[q]) {
+                    answeredQuestions++;
+                    if (selected[q] === answers[q]) score++;
+                }
+            }
+            document.getElementById('score').style.display = 'block';
+            document.getElementById('score').innerHTML = `
+                <strong>¡Tu puntuación: ${score}/${answeredQuestions}!</strong> 
+                ${score === answeredQuestions ? '¡Perfecto!' : score >= Math.ceil(answeredQuestions * 0.7) ? '¡Bien hecho!' : '¡Sigue practicando!'}
+                <br>Respondiste ${answeredQuestions} de 10 preguntas.
+            `;
+            document.getElementById('thanks').style.display = 'block';
+        }
+
+        function submitQuiz() {
+            if (!selected[10]) {
+                alert('Por favor, selecciona una opción antes de enviar.');
+                return;
+            }
+            const submitButton = document.querySelector(`#question10 button[aria-label="Enviar respuestas del quiz"]`);
+            submitButton.disabled = true;
+            const options = document.querySelectorAll(`#question10 .options .option`);
+            const explanationElement = document.getElementById(`explanation10`);
+            for (let opt of options) {
+                opt.style.pointerEvents = 'none';
+                if (opt.textContent.trim() === answers[10]) {
+                    opt.classList.add('correct');
+                } else if (selected[10] === opt.textContent.trim() && selected[10] !== answers[10]) {
+                    opt.classList.add('incorrect');
+                    explanationElement.textContent = explanations[10];
+                    explanationElement.style.display = 'block';
+                }
+            }
+            setTimeout(() => {
+                document.getElementById('question10').classList.remove('active');
+                explanationElement.style.display = 'none';
+                let score = 0;
+                let answeredQuestions = 0;
+                for (let q in answers) {
+                    if (selected[q]) {
+                        answeredQuestions++;
+                        if (selected[q] === answers[q]) score++;
+                    }
+                }
+                document.getElementById('score').style.display = 'block';
+                document.getElementById('score').innerHTML = `
+                    <strong>¡Tu puntuación: ${score}/10!</strong> 
+                    ${score === 10 ? '¡Perfecto!' : score >= 7 ? '¡Bien hecho!' : '¡Sigue practicando!'}
+                    <br>Respondiste ${answeredQuestions} de 10 preguntas.
+                `;
+                document.getElementById('thanks').style.display = 'block';
+                submitButton.disabled = false;
+            }, 2000);
+        }
+    </script>
+</body>
+</html>
+```
